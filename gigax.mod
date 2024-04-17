@@ -412,3 +412,4 @@ end
 
 mod.gigaxServer = gigaxServer
 mod.gigaxClient = _gigaxClient
+return mod
