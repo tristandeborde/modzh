@@ -4,6 +4,7 @@
 
 --server--------------
 ----------------------
+mod = {}
 gigaxServer = {}
 
 gigaxServer._init = function(self)
@@ -408,3 +409,6 @@ _gigaxClient.findClosestLocation = function (self, playerPosition, locationData)
         return closestLocation
     end
 end
+
+mod.gigaxServer = gigaxServer
+mod.gigaxClient = _gigaxClient
