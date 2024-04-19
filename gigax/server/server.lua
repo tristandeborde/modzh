@@ -22,7 +22,7 @@ mod.receiveEvent = function (self, e)
     elseif e.action == "stepMainCharacter" then
         mod:_stepMainCharacter(self._character, self._engineId, e.actionType, self._npcData["aduermael"]._id, self._npcData["aduermael"].name, e.content)
     elseif e.action == "updateCharacterLocation" then
-        local closest = _gigaxClient:findClosestLocation(e.position, self._locationData)
+        local closest = self:findClosestLocation(e.position, self._locationData)
         -- if closest._id is different from the current location, update the character's location
         if self._character == nil then
             print("Character not created yet; cannot update location.")
@@ -250,5 +250,33 @@ mod._updateCharacterLocation = function(self, engineId, characterId, locationId)
         self._character = JSON:Decode(response.Body)
     end)
 end
+
+-- Function to calculate distance between two positions
+mod._calculateDistance = function(_, pos1, pos2)
+    local dx = pos1.X - pos2.x
+    local dy = pos1.Y - pos2.y
+    local dz = pos1.Z - pos2.z
+    return math.sqrt(dx*dx + dy*dy + dz*dz)
+end
+
+mod._findClosestLocation = function (self, playerPosition, locationData)
+    -- Assume `playerPosition` holds the current position of the player
+    local closestLocation = nil
+    local smallestDistance = math.huge -- Large initial value
+    
+    for _, location in pairs(locationData) do
+        local distance = self:calculateDistance(playerPosition, location.position)
+        if distance < smallestDistance then
+            smallestDistance = distance
+            closestLocation = location
+        end
+    end
+    
+    if closestLocation then
+        -- Closest location found, now send its ID to update the character's location
+        return closestLocation
+    end
+end
+
 
 return mod
