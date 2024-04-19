@@ -21,7 +21,7 @@ mod.receiveEvent = function (self, e)
     elseif e.action == "registerEngine" then
         mod:_registerEngine(e.Sender, e.api_url, e.api_token)
     elseif e.action == "stepMainCharacter" then
-        mod:_stepMainCharacter(self._character, self._engineId, e.actionType, self._npcData["aduermael"]._id, self._npcData["aduermael"].name, e.content)
+        mod:_stepMainCharacter(self._character, self._engineId, e.actionType, self._npcData["aduermael"]._id, self._npcData["aduermael"].name, e.content, e.api_url, e.api_token)
     elseif e.action == "updateCharacterLocation" then
         local closest = self:_findClosestLocation(e.position, self._locationData)
         -- if closest._id is different from the current location, update the character's location
@@ -30,7 +30,7 @@ mod.receiveEvent = function (self, e)
             return
         end
         if closest._id ~= self._character.current_location._id then
-            mod:_updateCharacterLocation(self._engineId, e.characterId, closest._id)
+            mod:_updateCharacterLocation(self._engineId, e.characterId, closest._id, e.api_url, e.api_token)
         end
     else
         print("Unknown Gigax message received from mod.")
@@ -146,7 +146,7 @@ mod._registerEngine = function(self, sender, api_url, api_token)
         end
 
         
-        self:_registerMainCharacter(self._engineId, self._locationData["Medieval Inn"]._id, sender)
+        self:_registerMainCharacter(self._engineId, self._locationData["Medieval Inn"]._id, sender, api_url, api_token)
         -- print the location data as JSON
     end)
 end
