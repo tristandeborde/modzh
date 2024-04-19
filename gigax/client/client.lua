@@ -151,4 +151,4 @@ mod.findClosestLocation = function (self, playerPosition, locationData)
     end
 end
 
-mod.mod = mod
+return mod
