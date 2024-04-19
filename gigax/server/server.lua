@@ -1,10 +1,11 @@
---server--------------
-----------------------
+------------------------------------------------
+-- Server --------------------------------------
+------------------------------------------------
 mod = {}
 
 mod._init = function(self)
     -- Initialize tables to hold NPC and location data
-    print("Initializing Gigax server...")
+    print("Initializing Gigax mod...")
     self._engineId = nil
     self._locationId = nil
     self._character = nil
@@ -22,7 +23,7 @@ mod.receiveEvent = function (self, e)
     elseif e.action == "stepMainCharacter" then
         mod:_stepMainCharacter(self._character, self._engineId, e.actionType, self._npcData["aduermael"]._id, self._npcData["aduermael"].name, e.content)
     elseif e.action == "updateCharacterLocation" then
-        local closest = self:findClosestLocation(e.position, self._locationData)
+        local closest = self:_findClosestLocation(e.position, self._locationData)
         -- if closest._id is different from the current location, update the character's location
         if self._character == nil then
             print("Character not created yet; cannot update location.")
@@ -32,7 +33,7 @@ mod.receiveEvent = function (self, e)
             mod:_updateCharacterLocation(self._engineId, e.characterId, closest._id)
         end
     else
-        print("Unknown Gigax message received from server.")
+        print("Unknown Gigax message received from mod.")
     end
 end
 
@@ -91,7 +92,7 @@ mod._registerEngine = function(self, sender, api_url, api_token)
 
     -- Prepare the data structure expected by the backend
     local engineData = {
-        name = "mod_test",
+        name = "server_test",
         NPCs = {},
         locations = {} -- Populate if you have dynamic location data similar to NPCs
     }
@@ -150,7 +151,7 @@ mod._registerEngine = function(self, sender, api_url, api_token)
     end)
 end
 
-mod._registerMainCharacter = function(self, engineId, locationId, sender)
+mod._registerMainCharacter = function(self, engineId, locationId, sender, api_url, api_token)
     -- Example character data, replace with actual data as needed
     local newCharacterData = {
         name = "oncheman",
@@ -164,10 +165,10 @@ mod._registerMainCharacter = function(self, engineId, locationId, sender)
 
     local headers = {
         ["Content-Type"] = "application/json",
-        ["Authorization"] = YOUR_API_TOKEN
+        ["Authorization"] = api_token
     }
 
-    local apiUrl = API_URL .. "/api/character/company/main?engine_id=" .. engineId
+    local apiUrl = api_url .. "/api/character/company/main?engine_id=" .. engineId
 
     -- Make the HTTP POST request
     HTTP:Post(apiUrl, headers, jsonData, function(response)
@@ -182,9 +183,9 @@ mod._registerMainCharacter = function(self, engineId, locationId, sender)
     end)
 end
 
-mod._stepMainCharacter = function(self, character, engineId, actionType, targetId, targetName, content)
+mod._stepMainCharacter = function(self, character, engineId, actionType, targetId, targetName, content, api_url, api_token)
     -- Now, step the character
-    local stepUrl = API_URL .. "/api/character/" .. character._id .. "/step-no-ws?engine_id=" .. engineId 
+    local stepUrl = api_url .. "/api/character/" .. character._id .. "/step-no-ws?engine_id=" .. engineId 
     local stepActionData = {
         character_id = character._id,  -- Use the character ID from the creation/fetch response
         action_type = actionType,
@@ -197,7 +198,7 @@ mod._stepMainCharacter = function(self, character, engineId, actionType, targetI
 
     local headers = {
         ["Content-Type"] = "application/json",
-        ["Authorization"] = YOUR_API_TOKEN
+        ["Authorization"] = api_token
     }
     -- You might need to adjust headers or use the same if they include the needed Authorization
     HTTP:Post(stepUrl, headers, stepJsonData, function(stepResponse)
@@ -227,7 +228,7 @@ mod._stepMainCharacter = function(self, character, engineId, actionType, targetI
     end)
 end
 
-mod._updateCharacterLocation = function(self, engineId, characterId, locationId)
+mod._updateCharacterLocation = function(self, engineId, characterId, locationId, api_url, api_token)
     local updateData = {
         -- Fill with necessary character update information
         current_location_id = locationId
@@ -236,11 +237,11 @@ mod._updateCharacterLocation = function(self, engineId, characterId, locationId)
     local jsonData = JSON:Encode(updateData)
     local headers = {
         ["Content-Type"] = "application/json",
-        ["Authorization"] = YOUR_API_TOKEN
+        ["Authorization"] = api_token
     }
     
     -- Assuming `characterId` and `engineId` are available globally or passed appropriately
-    local apiUrl = API_URL .. "/api/character/" .. characterId .. "?engine_id=" .. engineId
+    local apiUrl = api_url .. "/api/character/" .. characterId .. "?engine_id=" .. engineId
     
     HTTP:Post(apiUrl, headers, jsonData, function(response)
         if response.StatusCode ~= 200 then
@@ -265,7 +266,7 @@ mod._findClosestLocation = function (self, playerPosition, locationData)
     local smallestDistance = math.huge -- Large initial value
     
     for _, location in pairs(locationData) do
-        local distance = self:calculateDistance(playerPosition, location.position)
+        local distance = self:_calculateDistance(playerPosition, location.position)
         if distance < smallestDistance then
             smallestDistance = distance
             closestLocation = location
