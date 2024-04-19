@@ -18,7 +18,7 @@ mod.receiveEvent = function (self, e)
     elseif e.action == "registerLocation" then
         mod:_registerLocation(e.name, e.position, e.description)
     elseif e.action == "registerEngine" then
-        mod:_registerEngine(e.Sender)
+        mod:_registerEngine(e.Sender, e.api_url, e.api_token)
     elseif e.action == "stepMainCharacter" then
         mod:_stepMainCharacter(self._character, self._engineId, e.actionType, self._npcData["aduermael"]._id, self._npcData["aduermael"].name, e.content)
     elseif e.action == "updateCharacterLocation" then
@@ -82,11 +82,11 @@ mod._registerLocation = function(self, name, position, description)
     }
 end
 
-mod._registerEngine = function(self, sender)
-    local apiUrl = API_URL .. "/api/engine/company/"
+mod._registerEngine = function(self, sender, api_url, api_token)
+    local apiUrl = api_url .. "/api/engine/company/"
     local headers = {
         ["Content-Type"] = "application/json",
-        ["Authorization"] = YOUR_API_TOKEN
+        ["Authorization"] = api_token
     }
 
     -- Prepare the data structure expected by the backend
